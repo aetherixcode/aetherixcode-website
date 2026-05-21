@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { uploadToDrive } from "../lib/gdrive";
 import { supabase } from "../lib/supabase";
 
 import { toastError, toastSuccess } from "./ToastContext";
@@ -30,6 +31,12 @@ export default function AdminPanel() {
   const [showLectureList, setShowLectureList] = useState<string | null>(null);
   const [editingLecture, setEditingLecture] = useState<Lecture | null>(null);
   const [lecEditLoading, setLecEditLoading] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
+
+  const notesRef = useRef<HTMLInputElement>(null);
+  const dppRef = useRef<HTMLInputElement>(null);
+  const dppSolRef = useRef<HTMLInputElement>(null);
+  const quizRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({ name: "", slug: "", description: "", image_url: "", difficulty: "beginner", teacher_name: "", prerequisites: "" });
   const [lecForm, setLecForm] = useState({ lecture_number: "", title: "", video_url: "", notes_url: "", dpp_url: "", dpp_solution_url: "", quiz_url: "" });
@@ -137,6 +144,26 @@ export default function AdminPanel() {
 
   const resetForm = () => { setForm({ name: "", slug: "", description: "", image_url: "", difficulty: "beginner", teacher_name: "", prerequisites: "" }); setPreviewMd(false); };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: "notes_url" | "dpp_url" | "dpp_solution_url" | "quiz_url") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const course = courses.find(c => c.id === showLecture);
+    if (!course) { toastError("Select a course first"); return; }
+
+    setUploading(field);
+    try {
+      const { downloadUrl } = await uploadToDrive(file, course.teacher_name, course.name, `Lecture ${lecForm.lecture_number || "new"}`);
+      setLecForm(p => ({ ...p, [field]: downloadUrl }));
+      toastSuccess(`${file.name} uploaded to Drive!`);
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(null);
+      e.target.value = "";
+    }
+  };
+
   if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><div className="w-6 h-6 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin" /></div>;
 
   return (
@@ -222,10 +249,42 @@ export default function AdminPanel() {
                 <input type="text" placeholder="Title" value={lecForm.title} onChange={(e) => setLecForm(p => ({ ...p, title: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
               </div>
               <input type="text" placeholder="YouTube URL" value={lecForm.video_url} onChange={(e) => setLecForm(p => ({ ...p, video_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="Notes PDF URL (GitHub raw)" value={lecForm.notes_url} onChange={(e) => setLecForm(p => ({ ...p, notes_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="DPP PDF URL (GitHub raw)" value={lecForm.dpp_url} onChange={(e) => setLecForm(p => ({ ...p, dpp_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="DPP Solution PDF URL (GitHub raw)" value={lecForm.dpp_solution_url} onChange={(e) => setLecForm(p => ({ ...p, dpp_solution_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="Quiz JSON URL (GitHub raw)" value={lecForm.quiz_url} onChange={(e) => setLecForm(p => ({ ...p, quiz_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+              <div className="space-y-1">
+                <div className="flex gap-2">
+                  <input type="text" placeholder="Notes PDF (upload or paste URL)" value={lecForm.notes_url} onChange={(e) => setLecForm(p => ({ ...p, notes_url: e.target.value }))} className="flex-1 bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+                  <input ref={notesRef} type="file" accept=".pdf" className="hidden" onChange={(e) => handleFileUpload(e, "notes_url")} />
+                  <button onClick={() => notesRef.current?.click()} disabled={uploading === "notes_url"} className="px-3 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all disabled:opacity-50 whitespace-nowrap">
+                    {uploading === "notes_url" ? "..." : "Upload"}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex gap-2">
+                  <input type="text" placeholder="DPP PDF (upload or paste URL)" value={lecForm.dpp_url} onChange={(e) => setLecForm(p => ({ ...p, dpp_url: e.target.value }))} className="flex-1 bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+                  <input ref={dppRef} type="file" accept=".pdf" className="hidden" onChange={(e) => handleFileUpload(e, "dpp_url")} />
+                  <button onClick={() => dppRef.current?.click()} disabled={uploading === "dpp_url"} className="px-3 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all disabled:opacity-50 whitespace-nowrap">
+                    {uploading === "dpp_url" ? "..." : "Upload"}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex gap-2">
+                  <input type="text" placeholder="DPP Solution PDF (upload or paste URL)" value={lecForm.dpp_solution_url} onChange={(e) => setLecForm(p => ({ ...p, dpp_solution_url: e.target.value }))} className="flex-1 bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+                  <input ref={dppSolRef} type="file" accept=".pdf" className="hidden" onChange={(e) => handleFileUpload(e, "dpp_solution_url")} />
+                  <button onClick={() => dppSolRef.current?.click()} disabled={uploading === "dpp_solution_url"} className="px-3 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all disabled:opacity-50 whitespace-nowrap">
+                    {uploading === "dpp_solution_url" ? "..." : "Upload"}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex gap-2">
+                  <input type="text" placeholder="Quiz JSON (upload or paste URL)" value={lecForm.quiz_url} onChange={(e) => setLecForm(p => ({ ...p, quiz_url: e.target.value }))} className="flex-1 bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+                  <input ref={quizRef} type="file" accept=".json,.pdf" className="hidden" onChange={(e) => handleFileUpload(e, "quiz_url")} />
+                  <button onClick={() => quizRef.current?.click()} disabled={uploading === "quiz_url"} className="px-3 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all disabled:opacity-50 whitespace-nowrap">
+                    {uploading === "quiz_url" ? "..." : "Upload"}
+                  </button>
+                </div>
+              </div>
             </div>
             <div className="flex gap-4 mt-6">
               <button onClick={() => { setShowLecture(null); setLecForm({ lecture_number: "", title: "", video_url: "", notes_url: "", dpp_url: "", dpp_solution_url: "", quiz_url: "" }); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
@@ -274,10 +333,10 @@ export default function AdminPanel() {
                 <input type="text" placeholder="Title" value={editingLecture.title} onChange={(e) => setEditingLecture(p => ({ ...p!, title: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
               </div>
               <input type="text" placeholder="YouTube URL" value={editingLecture.video_url} onChange={(e) => setEditingLecture(p => ({ ...p!, video_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="Notes PDF URL (GitHub raw)" value={editingLecture.notes_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, notes_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="DPP PDF URL (GitHub raw)" value={editingLecture.dpp_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, dpp_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="DPP Solution PDF URL (GitHub raw)" value={editingLecture.dpp_solution_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, dpp_solution_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="Quiz JSON URL (GitHub raw)" value={editingLecture.quiz_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, quiz_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+              <input type="text" placeholder="Notes PDF URL" value={editingLecture.notes_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, notes_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+              <input type="text" placeholder="DPP PDF URL" value={editingLecture.dpp_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, dpp_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+              <input type="text" placeholder="DPP Solution PDF URL" value={editingLecture.dpp_solution_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, dpp_solution_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+              <input type="text" placeholder="Quiz JSON URL" value={editingLecture.quiz_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, quiz_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
             </div>
             <div className="flex gap-4 mt-6">
               <button onClick={() => setEditingLecture(null)} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
