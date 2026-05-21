@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 
-import { getDriveEmbedUrl, getDriveDownloadUrl } from "../lib/gdrive-utils";
+import { getDrivePreviewUrl, getDriveDownloadUrl } from "../lib/gdrive-utils";
 import { supabase } from "../lib/supabase";
 
 import { toastError, toastSuccess, toastInfo } from "./ToastContext";
@@ -386,9 +386,9 @@ export default function DashboardHome() {
                     </button>
                     {activeResource === "notes" && (
                       <div className="border-t border-border-subtle">
-                        <iframe src={getDriveEmbedUrl(activeLecture.notes_url)!} className="w-full h-[500px]" title="Notes" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-popups" />
+                        <iframe src={getDrivePreviewUrl(activeLecture.notes_url)!} className="w-full h-[500px]" title="Notes" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-popups" />
                         <div className="flex justify-end p-3 border-t border-border-subtle">
-                          <a href={getDriveDownloadUrl(activeLecture.notes_url)!} className="flex items-center gap-2 px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">
+                          <a href={getDriveDownloadUrl(activeLecture.notes_url)!} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><polyline points="7 10 12 15 17 10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeWidth="2" strokeLinecap="round" /></svg>
                             Download
                           </a>
@@ -408,9 +408,9 @@ export default function DashboardHome() {
                     </button>
                     {activeResource === "dpp" && (
                       <div className="border-t border-border-subtle">
-                        <iframe src={getDriveEmbedUrl(activeLecture.dpp_url)!} className="w-full h-[500px]" title="DPP Problem" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-popups" />
+                        <iframe src={getDrivePreviewUrl(activeLecture.dpp_url)!} className="w-full h-[500px]" title="DPP Problem" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-popups" />
                         <div className="flex justify-end p-3 border-t border-border-subtle">
-                          <a href={getDriveDownloadUrl(activeLecture.dpp_url)!} className="flex items-center gap-2 px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">
+                          <a href={getDriveDownloadUrl(activeLecture.dpp_url)!} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><polyline points="7 10 12 15 17 10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeWidth="2" strokeLinecap="round" /></svg>
                             Download
                           </a>
@@ -430,9 +430,9 @@ export default function DashboardHome() {
                     </button>
                     {activeResource === "dpp_solution" && (
                       <div className="border-t border-border-subtle">
-                        <iframe src={getDriveEmbedUrl(activeLecture.dpp_solution_url)!} className="w-full h-[500px]" title="DPP Solution" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-popups" />
+                        <iframe src={getDrivePreviewUrl(activeLecture.dpp_solution_url)!} className="w-full h-[500px]" title="DPP Solution" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-popups" />
                         <div className="flex justify-end p-3 border-t border-border-subtle">
-                          <a href={getDriveDownloadUrl(activeLecture.dpp_solution_url)!} className="flex items-center gap-2 px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">
+                          <a href={getDriveDownloadUrl(activeLecture.dpp_solution_url)!} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><polyline points="7 10 12 15 17 10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeWidth="2" strokeLinecap="round" /></svg>
                             Download
                           </a>

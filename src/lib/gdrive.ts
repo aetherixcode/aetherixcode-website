@@ -1,6 +1,6 @@
 const SCRIPT_URL = import.meta.env.PUBLIC_GDRIVE_SCRIPT_URL;
 
-export async function uploadToDrive(file: File, teacherName: string, courseName: string, lectureName: string): Promise<{ downloadUrl: string; previewUrl: string; embedUrl: string }> {
+export async function uploadToDrive(file: File, teacherName: string, courseName: string, lectureName: string): Promise<{ fileId: string; viewUrl: string; downloadUrl: string }> {
   if (!SCRIPT_URL) throw new Error("Google Drive script URL not configured");
 
   const base64 = await fileToBase64(file);
@@ -21,7 +21,7 @@ export async function uploadToDrive(file: File, teacherName: string, courseName:
 
   if (!data.success) throw new Error(data.error || "Upload failed");
 
-  return { downloadUrl: data.downloadUrl, previewUrl: data.previewUrl, embedUrl: data.embedUrl };
+  return { fileId: data.fileId, viewUrl: data.viewUrl, downloadUrl: data.downloadUrl };
 }
 
 export async function deleteFromDrive(fileId: string): Promise<boolean> {

@@ -4,11 +4,9 @@ export function getDriveFileId(url: string | null): string | null {
   return match ? match[1] : null;
 }
 
-export function getDriveEmbedUrl(url: string | null): string | null {
-  if (!url) return null;
+export function getDrivePreviewUrl(url: string | null): string | null {
   const id = getDriveFileId(url);
-  if (!id) return url;
-  return `https://docs.google.com/gview?url=https://drive.google.com/uc?export=view&id=${id}&embedded=true`;
+  return id ? `https://drive.google.com/file/d/${id}/preview` : url;
 }
 
 export function getDriveDownloadUrl(url: string | null): string | null {

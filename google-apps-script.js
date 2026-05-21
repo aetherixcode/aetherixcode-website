@@ -60,17 +60,16 @@ function doPost(e) {
     const file = lectureFolder.createFile(blob);
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
-    const downloadUrl = `https://drive.google.com/uc?export=download&id=${file.getId()}`;
-    const previewUrl = `https://drive.google.com/file/d/${file.getId()}/view`;
-    const embedUrl = `https://docs.google.com/gview?url=https://drive.google.com/uc?export=view&id=${file.getId}&embedded=true`;
+    const fileId = file.getId();
+    const viewUrl = `https://drive.google.com/file/d/${fileId}/view`;
+    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
     return ContentService.createTextOutput(
       JSON.stringify({
         success: true,
-        fileId: file.getId(),
+        fileId: fileId,
+        viewUrl: viewUrl,
         downloadUrl: downloadUrl,
-        previewUrl: previewUrl,
-        embedUrl: embedUrl,
       })
     ).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
@@ -90,15 +89,6 @@ function doGet(e) {
     }
 
     const file = DriveApp.getFileById(fileId);
-    const parentFolders = file.getParents();
-    let parentFolder;
-    if (parentFolders.hasNext()) {
-      parentFolder = parentFolders.next();
-    }
-
-    parentFolder.removeFile(file);
-    DriveApp.getRootFolder().addFile(file);
-    DriveApp.getRootFolder().removeFile(file);
     file.setTrashed(true);
 
     return ContentService.createTextOutput(

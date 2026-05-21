@@ -164,11 +164,11 @@ export default function AdminPanel() {
 
     setUploading(field);
     try {
-      const { embedUrl } = await uploadToDrive(file, course.teacher_name, course.name, lectureTitle);
+      const { viewUrl } = await uploadToDrive(file, course.teacher_name, course.name, lectureTitle);
       if (showLecture) {
-        setLecForm(p => ({ ...p, [field]: embedUrl }));
+        setLecForm(p => ({ ...p, [field]: viewUrl }));
       } else if (editingLecture) {
-        setEditingLecture(p => ({ ...p!, [field]: embedUrl }));
+        setEditingLecture(p => ({ ...p!, [field]: viewUrl }));
       }
       setUploadStatus(p => ({ ...p, [field]: "uploaded" }));
       toastSuccess(`${file.name} uploaded!`);
