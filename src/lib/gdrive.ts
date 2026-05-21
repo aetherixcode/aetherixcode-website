@@ -21,7 +21,19 @@ export async function uploadToDrive(file: File, teacherName: string, courseName:
 
   if (!data.success) throw new Error(data.error || "Upload failed");
 
-  return { downloadUrl: data.downloadUrl, previewUrl: data.previewUrl };
+  return { downloadUrl: data.downloadUrl, previewUrl: data.previewUrl, embedUrl: data.embedUrl };
+}
+
+export async function deleteFromDrive(fileId: string): Promise<boolean> {
+  if (!SCRIPT_URL || !fileId) return false;
+
+  try {
+    const response = await fetch(`${SCRIPT_URL}?fileId=${encodeURIComponent(fileId)}`);
+    const data = await response.json();
+    return data.success === true;
+  } catch {
+    return false;
+  }
 }
 
 function fileToBase64(file: File): Promise<string> {

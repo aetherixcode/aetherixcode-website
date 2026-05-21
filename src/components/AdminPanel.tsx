@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { uploadToDrive } from "../lib/gdrive";
+import { uploadToDrive, deleteFromDrive } from "../lib/gdrive";
+import { getDriveFileId } from "../lib/gdrive-utils";
 import { supabase } from "../lib/supabase";
 
-import { toastError, toastSuccess } from "./ToastContext";
+import { toastError, toastSuccess, toastInfo } from "./ToastContext";
 
 interface Course {
   id: string; slug: string; name: string; description: string; image_url: string | null;
@@ -16,6 +17,8 @@ interface Lecture {
   id: string; lecture_number: number; title: string; video_url: string;
   notes_url: string | null; dpp_url: string | null; dpp_solution_url: string | null; quiz_url: string | null;
 }
+
+type ResourceField = "notes_url" | "dpp_url" | "dpp_solution_url" | "quiz_url";
 
 export default function AdminPanel() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -31,7 +34,10 @@ export default function AdminPanel() {
   const [showLectureList, setShowLectureList] = useState<string | null>(null);
   const [editingLecture, setEditingLecture] = useState<Lecture | null>(null);
   const [lecEditLoading, setLecEditLoading] = useState(false);
-  const [uploading, setUploading] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<ResourceField | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<Record<ResourceField, "uploaded" | "removed" | null>>({
+    notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null,
+  });
 
   const notesRef = useRef<HTMLInputElement>(null);
   const dppRef = useRef<HTMLInputElement>(null);
@@ -106,6 +112,7 @@ export default function AdminPanel() {
     });
     if (error) { toastError(error.message); return; }
     setLecForm({ lecture_number: "", title: "", video_url: "", notes_url: "", dpp_url: "", dpp_solution_url: "", quiz_url: "" });
+    setUploadStatus({ notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null });
     setShowLecture(null);
     toastSuccess(`Lecture "${lecForm.title}" added!`);
     loadCourses();
@@ -133,6 +140,7 @@ export default function AdminPanel() {
     setLecEditLoading(false);
     if (error) { toastError(error.message); return; }
     setEditingLecture(null);
+    setUploadStatus({ notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null });
     toastSuccess(`Lecture "${editingLecture.title}" updated!`);
     if (showLectureList) loadLectures(showLectureList);
   };
@@ -144,24 +152,84 @@ export default function AdminPanel() {
 
   const resetForm = () => { setForm({ name: "", slug: "", description: "", image_url: "", difficulty: "beginner", teacher_name: "", prerequisites: "" }); setPreviewMd(false); };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: "notes_url" | "dpp_url" | "dpp_solution_url" | "quiz_url") => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: ResourceField) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const course = courses.find(c => c.id === showLecture);
+    const course = courses.find(c => c.id === (showLecture || (editingLecture && lectures.find(l => l.id === editingLecture.id)?.course_id)));
     if (!course) { toastError("Select a course first"); return; }
+
+    const lectureNum = lecForm.lecture_number || editingLecture?.lecture_number?.toString() || "new";
+    const lectureTitle = lecForm.title || editingLecture?.title || `Lecture ${lectureNum}`;
 
     setUploading(field);
     try {
-      const { embedUrl } = await uploadToDrive(file, course.teacher_name, course.name, `Lecture ${lecForm.lecture_number || "new"}`);
-      setLecForm(p => ({ ...p, [field]: embedUrl }));
-      toastSuccess(`${file.name} uploaded to Drive!`);
+      const { embedUrl } = await uploadToDrive(file, course.teacher_name, course.name, lectureTitle);
+      if (showLecture) {
+        setLecForm(p => ({ ...p, [field]: embedUrl }));
+      } else if (editingLecture) {
+        setEditingLecture(p => ({ ...p!, [field]: embedUrl }));
+      }
+      setUploadStatus(p => ({ ...p, [field]: "uploaded" }));
+      toastSuccess(`${file.name} uploaded!`);
     } catch (err) {
       toastError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(null);
       e.target.value = "";
     }
+  };
+
+  const handleRemoveFile = async (field: ResourceField) => {
+    const currentUrl = showLecture ? lecForm[field] : editingLecture?.[field];
+    if (currentUrl) {
+      const fileId = getDriveFileId(currentUrl);
+      if (fileId) await deleteFromDrive(fileId);
+    }
+    if (showLecture) {
+      setLecForm(p => ({ ...p, [field]: "" }));
+    } else if (editingLecture) {
+      setEditingLecture(p => ({ ...p!, [field]: null }));
+    }
+    setUploadStatus(p => ({ ...p, [field]: "removed" }));
+    toastInfo("File removed. Click Upload to add a new one.");
+  };
+
+  const renderResourceField = (field: ResourceField, label: string, accept: string, inputRef: React.RefObject<HTMLInputElement>) => {
+    const isAdding = !!showLecture;
+    const currentUrl = isAdding ? lecForm[field] : editingLecture?.[field] || "";
+    const status = uploadStatus[field];
+    const hasExisting = !!currentUrl;
+    const isRemoved = status === "removed";
+
+    return (
+      <div key={field} className="space-y-2">
+        <label className="text-xs text-text-label font-body">{label}</label>
+        {!hasExisting || isRemoved ? (
+          <div className="flex gap-2">
+            <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={(e) => handleFileUpload(e, field)} />
+            <button onClick={() => inputRef.current?.click()} disabled={uploading === field} className="flex-1 py-3 text-sm font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              {uploading === field ? (
+                <><div className="w-4 h-4 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin" /> Uploading...</>
+              ) : (
+                <>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><polyline points="17 8 12 3 7 8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="3" x2="12" y2="15" strokeWidth="2" strokeLinecap="round" /></svg>
+                  Upload {label}
+                </>
+              )}
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-green-400 shrink-0"><path d="M20 6L9 17l-5-5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <span className="text-sm font-body text-green-400 flex-1 truncate">Uploaded — {label}</span>
+            <button onClick={() => handleRemoveFile(field)} className="px-3 py-1.5 text-xs font-body text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-all">
+              Remove
+            </button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><div className="w-6 h-6 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin" /></div>;
@@ -249,45 +317,13 @@ export default function AdminPanel() {
                 <input type="text" placeholder="Title" value={lecForm.title} onChange={(e) => setLecForm(p => ({ ...p, title: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
               </div>
               <input type="text" placeholder="YouTube URL" value={lecForm.video_url} onChange={(e) => setLecForm(p => ({ ...p, video_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <div className="space-y-1">
-                <div className="flex gap-2">
-                  <input type="text" placeholder="Notes PDF (upload or paste URL)" value={lecForm.notes_url} onChange={(e) => setLecForm(p => ({ ...p, notes_url: e.target.value }))} className="flex-1 bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-                  <input ref={notesRef} type="file" accept=".pdf" className="hidden" onChange={(e) => handleFileUpload(e, "notes_url")} />
-                  <button onClick={() => notesRef.current?.click()} disabled={uploading === "notes_url"} className="px-3 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all disabled:opacity-50 whitespace-nowrap">
-                    {uploading === "notes_url" ? "..." : "Upload"}
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex gap-2">
-                  <input type="text" placeholder="DPP PDF (upload or paste URL)" value={lecForm.dpp_url} onChange={(e) => setLecForm(p => ({ ...p, dpp_url: e.target.value }))} className="flex-1 bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-                  <input ref={dppRef} type="file" accept=".pdf" className="hidden" onChange={(e) => handleFileUpload(e, "dpp_url")} />
-                  <button onClick={() => dppRef.current?.click()} disabled={uploading === "dpp_url"} className="px-3 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all disabled:opacity-50 whitespace-nowrap">
-                    {uploading === "dpp_url" ? "..." : "Upload"}
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex gap-2">
-                  <input type="text" placeholder="DPP Solution PDF (upload or paste URL)" value={lecForm.dpp_solution_url} onChange={(e) => setLecForm(p => ({ ...p, dpp_solution_url: e.target.value }))} className="flex-1 bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-                  <input ref={dppSolRef} type="file" accept=".pdf" className="hidden" onChange={(e) => handleFileUpload(e, "dpp_solution_url")} />
-                  <button onClick={() => dppSolRef.current?.click()} disabled={uploading === "dpp_solution_url"} className="px-3 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all disabled:opacity-50 whitespace-nowrap">
-                    {uploading === "dpp_solution_url" ? "..." : "Upload"}
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex gap-2">
-                  <input type="text" placeholder="Quiz JSON (upload or paste URL)" value={lecForm.quiz_url} onChange={(e) => setLecForm(p => ({ ...p, quiz_url: e.target.value }))} className="flex-1 bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-                  <input ref={quizRef} type="file" accept=".json,.pdf" className="hidden" onChange={(e) => handleFileUpload(e, "quiz_url")} />
-                  <button onClick={() => quizRef.current?.click()} disabled={uploading === "quiz_url"} className="px-3 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all disabled:opacity-50 whitespace-nowrap">
-                    {uploading === "quiz_url" ? "..." : "Upload"}
-                  </button>
-                </div>
-              </div>
+              {renderResourceField("notes_url", "Notes PDF", ".pdf", notesRef)}
+              {renderResourceField("dpp_url", "DPP PDF", ".pdf", dppRef)}
+              {renderResourceField("dpp_solution_url", "DPP Solution PDF", ".pdf", dppSolRef)}
+              {renderResourceField("quiz_url", "Quiz JSON", ".json,.pdf", quizRef)}
             </div>
             <div className="flex gap-4 mt-6">
-              <button onClick={() => { setShowLecture(null); setLecForm({ lecture_number: "", title: "", video_url: "", notes_url: "", dpp_url: "", dpp_solution_url: "", quiz_url: "" }); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
+              <button onClick={() => { setShowLecture(null); setLecForm({ lecture_number: "", title: "", video_url: "", notes_url: "", dpp_url: "", dpp_solution_url: "", quiz_url: "" }); setUploadStatus({ notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null }); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
               <button onClick={handleAddLecture} className="flex-1 py-3 text-sm font-body font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-600 rounded-lg hover:from-amber-300 hover:to-amber-500 transition-all">Add</button>
             </div>
           </div>
@@ -312,7 +348,7 @@ export default function AdminPanel() {
                       <span className="text-sm font-body text-text-secondary">{l.title}</span>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => setEditingLecture({ ...l })} className="text-xs font-body text-text-muted hover:text-amber-heading transition-colors">Edit</button>
+                      <button onClick={() => { setEditingLecture({ ...l }); setUploadStatus({ notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null }); }} className="text-xs font-body text-text-muted hover:text-amber-heading transition-colors">Edit</button>
                       <button onClick={() => handleDeleteLecture(l.id)} className="text-xs font-body text-red-400 hover:text-red-300 transition-colors">Delete</button>
                     </div>
                   </div>
@@ -333,13 +369,13 @@ export default function AdminPanel() {
                 <input type="text" placeholder="Title" value={editingLecture.title} onChange={(e) => setEditingLecture(p => ({ ...p!, title: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
               </div>
               <input type="text" placeholder="YouTube URL" value={editingLecture.video_url} onChange={(e) => setEditingLecture(p => ({ ...p!, video_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="Notes PDF URL" value={editingLecture.notes_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, notes_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="DPP PDF URL" value={editingLecture.dpp_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, dpp_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="DPP Solution PDF URL" value={editingLecture.dpp_solution_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, dpp_solution_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
-              <input type="text" placeholder="Quiz JSON URL" value={editingLecture.quiz_url || ""} onChange={(e) => setEditingLecture(p => ({ ...p!, quiz_url: e.target.value }))} className="w-full bg-surface-input border border-border-input rounded-lg px-4 py-3 text-sm text-text-secondary font-body placeholder-text-placeholder outline-none focus:border-border-input-focus" />
+              {renderResourceField("notes_url", "Notes PDF", ".pdf", notesRef)}
+              {renderResourceField("dpp_url", "DPP PDF", ".pdf", dppRef)}
+              {renderResourceField("dpp_solution_url", "DPP Solution PDF", ".pdf", dppSolRef)}
+              {renderResourceField("quiz_url", "Quiz JSON", ".json,.pdf", quizRef)}
             </div>
             <div className="flex gap-4 mt-6">
-              <button onClick={() => setEditingLecture(null)} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
+              <button onClick={() => { setEditingLecture(null); setUploadStatus({ notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null }); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
               <button onClick={handleEditLecture} disabled={lecEditLoading} className="flex-1 py-3 text-sm font-body font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-600 rounded-lg hover:from-amber-300 hover:to-amber-500 transition-all disabled:opacity-50">{lecEditLoading ? "Saving..." : "Save"}</button>
             </div>
           </div>

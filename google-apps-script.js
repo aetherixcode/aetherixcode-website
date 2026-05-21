@@ -62,7 +62,7 @@ function doPost(e) {
 
     const downloadUrl = `https://drive.google.com/uc?export=download&id=${file.getId()}`;
     const previewUrl = `https://drive.google.com/file/d/${file.getId()}/view`;
-    const embedUrl = `https://drive.google.com/file/d/${file.getId()}/preview`;
+    const embedUrl = `https://docs.google.com/gview?url=https://drive.google.com/uc?export=view&id=${file.getId}&embedded=true`;
 
     return ContentService.createTextOutput(
       JSON.stringify({
@@ -72,6 +72,37 @@ function doPost(e) {
         previewUrl: previewUrl,
         embedUrl: embedUrl,
       })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: false, error: error.toString() })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  try {
+    const fileId = e.parameter.fileId;
+    if (!fileId) {
+      return ContentService.createTextOutput(
+        JSON.stringify({ success: false, error: "Missing fileId" })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const file = DriveApp.getFileById(fileId);
+    const parentFolders = file.getParents();
+    let parentFolder;
+    if (parentFolders.hasNext()) {
+      parentFolder = parentFolders.next();
+    }
+
+    parentFolder.removeFile(file);
+    DriveApp.getRootFolder().addFile(file);
+    DriveApp.getRootFolder().removeFile(file);
+    file.setTrashed(true);
+
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: true, message: "File deleted" })
     ).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService.createTextOutput(

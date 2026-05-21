@@ -5,11 +5,13 @@ export function getDriveFileId(url: string | null): string | null {
 }
 
 export function getDriveEmbedUrl(url: string | null): string | null {
+  if (!url) return null;
   const id = getDriveFileId(url);
-  return id ? `https://drive.google.com/file/d/${id}/preview` : null;
+  if (!id) return url;
+  return `https://docs.google.com/gview?url=https://drive.google.com/uc?export=view&id=${id}&embedded=true`;
 }
 
 export function getDriveDownloadUrl(url: string | null): string | null {
   const id = getDriveFileId(url);
-  return id ? `https://drive.google.com/uc?export=download&id=${id}` : null;
+  return id ? `https://drive.google.com/uc?export=download&id=${id}` : url;
 }
