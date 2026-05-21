@@ -24,11 +24,34 @@ export async function uploadToDrive(file: File, teacherName: string, courseName:
   return { fileId: data.fileId, viewUrl: data.viewUrl, downloadUrl: data.downloadUrl };
 }
 
-export async function deleteFromDrive(fileId: string): Promise<boolean> {
+export async function deleteFileFromDrive(fileId: string): Promise<boolean> {
   if (!SCRIPT_URL || !fileId) return false;
-
   try {
-    const response = await fetch(`${SCRIPT_URL}?fileId=${encodeURIComponent(fileId)}`);
+    const response = await fetch(`${SCRIPT_URL}?action=deleteFile&fileId=${encodeURIComponent(fileId)}`);
+    const data = await response.json();
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteLectureFromDrive(teacherName: string, courseName: string, lectureName: string): Promise<boolean> {
+  if (!SCRIPT_URL || !teacherName || !courseName || !lectureName) return false;
+  try {
+    const params = new URLSearchParams({ action: "deleteLecture", teacherName, courseName, lectureName });
+    const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+    const data = await response.json();
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteCourseFromDrive(teacherName: string, courseName: string): Promise<boolean> {
+  if (!SCRIPT_URL || !teacherName || !courseName) return false;
+  try {
+    const params = new URLSearchParams({ action: "deleteCourse", teacherName, courseName });
+    const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
     const data = await response.json();
     return data.success === true;
   } catch {

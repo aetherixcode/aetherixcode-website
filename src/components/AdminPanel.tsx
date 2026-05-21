@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { uploadToDrive, deleteFromDrive } from "../lib/gdrive";
+import { uploadToDrive, deleteFileFromDrive, deleteLectureFromDrive, deleteCourseFromDrive } from "../lib/gdrive";
 import { getDriveFileId } from "../lib/gdrive-utils";
 import { supabase } from "../lib/supabase";
 
@@ -92,14 +92,8 @@ export default function AdminPanel() {
   const handleDelete = async (id: string) => {
     if (confirmText.toLowerCase() !== "yes") return;
     const course = courses.find(c => c.id === id);
-    const { data: lecturesToDelete } = await supabase.from("lectures").select("notes_url, dpp_url, dpp_solution_url, quiz_url").eq("course_id", id);
-    if (lecturesToDelete) {
-      for (const lec of lecturesToDelete) {
-        [lec.notes_url, lec.dpp_url, lec.dpp_solution_url, lec.quiz_url].forEach(async (url) => {
-          const fileId = getDriveFileId(url);
-          if (fileId) await deleteFromDrive(fileId);
-        });
-      }
+    if (course) {
+      await deleteCourseFromDrive(course.teacher_name, course.name);
     }
     await supabase.from("courses").delete().eq("id", id);
     setConfirmDelete(null);
@@ -129,10 +123,11 @@ export default function AdminPanel() {
 
   const handleDeleteLecture = async (lectureId: string) => {
     const lecture = lectures.find(l => l.id === lectureId);
-    [lecture?.notes_url, lecture?.dpp_url, lecture?.dpp_solution_url, lecture?.quiz_url].forEach(async (url) => {
-      const fileId = getDriveFileId(url);
-      if (fileId) await deleteFromDrive(fileId);
-    });
+    const course = courses.find(c => c.id === (showLectureList || (editingLecture && lectures.find(l => l.id === editingLecture.id)?.course_id)));
+    if (lecture && course) {
+      const lectureName = `Lecture ${lecture.lecture_number}`;
+      await deleteLectureFromDrive(course.teacher_name, course.name, lectureName);
+    }
     await supabase.from("lectures").delete().eq("id", lectureId);
     if (showLectureList) loadLectures(showLectureList);
     toastSuccess(`Lecture "${lecture?.title}" deleted.`);
@@ -180,7 +175,7 @@ export default function AdminPanel() {
       const currentUrl = showLecture ? lecForm[field] : editingLecture?.[field];
       if (currentUrl) {
         const oldFileId = getDriveFileId(currentUrl);
-        if (oldFileId) await deleteFromDrive(oldFileId);
+        if (oldFileId) await deleteFileFromDrive(oldFileId);
       }
 
       const { viewUrl } = await uploadToDrive(file, course.teacher_name, course.name, lectureTitle);
@@ -203,7 +198,7 @@ export default function AdminPanel() {
     const currentUrl = showLecture ? lecForm[field] : editingLecture?.[field];
     if (currentUrl) {
       const fileId = getDriveFileId(currentUrl);
-      if (fileId) await deleteFromDrive(fileId);
+      if (fileId) await deleteFileFromDrive(fileId);
     }
     if (showLecture) {
       setLecForm(p => ({ ...p, [field]: "" }));

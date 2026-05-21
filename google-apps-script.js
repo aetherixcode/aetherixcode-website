@@ -1,16 +1,6 @@
 // ============================================================
 // GOOGLE APPS SCRIPT — Deploy as Web App
 // ============================================================
-// HOW TO DEPLOY:
-// 1. Go to https://script.google.com
-// 2. New Project → paste this code
-// 3. Save → Deploy → New Deployment
-// 4. Type: Web App
-// 5. Execute as: Me
-// 6. Who has access: Anyone
-// 7. Deploy → copy the Web App URL
-// 8. Add to .env: PUBLIC_GDRIVE_SCRIPT_URL=<your-url>
-// ============================================================
 
 function doPost(e) {
   try {
@@ -81,22 +71,78 @@ function doPost(e) {
 
 function doGet(e) {
   try {
+    const action = e.parameter.action;
+    const teacherName = e.parameter.teacherName;
+    const courseName = e.parameter.courseName;
+    const lectureName = e.parameter.lectureName;
     const fileId = e.parameter.fileId;
-    if (!fileId) {
+
+    const rootFolderName = "aetherix-data";
+    const rootFolders = DriveApp.getFoldersByName(rootFolderName);
+    if (!rootFolders.hasNext()) {
       return ContentService.createTextOutput(
-        JSON.stringify({ success: false, error: "Missing fileId" })
+        JSON.stringify({ success: false, error: "Root folder not found" })
       ).setMimeType(ContentService.MimeType.JSON);
     }
+    const rootFolder = rootFolders.next();
 
-    const file = DriveApp.getFileById(fileId);
-    file.setTrashed(true);
+    if (action === "deleteFile") {
+      if (!fileId) throw new Error("Missing fileId");
+      const file = DriveApp.getFileById(fileId);
+      file.setTrashed(true);
+      return successResponse("File deleted");
+    }
+
+    if (action === "deleteLecture") {
+      if (!teacherName || !courseName || !lectureName) throw new Error("Missing parameters");
+      const teacherFolder = getFolderByName(rootFolder, teacherName);
+      if (!teacherFolder) return successResponse("Teacher folder not found");
+      const courseFolder = getFolderByName(teacherFolder, courseName);
+      if (!courseFolder) return successResponse("Course folder not found");
+      const lectureFolder = getFolderByName(courseFolder, lectureName);
+      if (!lectureFolder) return successResponse("Lecture folder not found");
+      lectureFolder.setTrashed(true);
+      return successResponse("Lecture folder deleted");
+    }
+
+    if (action === "deleteCourse") {
+      if (!teacherName || !courseName) throw new Error("Missing parameters");
+      const teacherFolder = getFolderByName(rootFolder, teacherName);
+      if (!teacherFolder) return successResponse("Teacher folder not found");
+      const courseFolder = getFolderByName(teacherFolder, courseName);
+      if (!courseFolder) return successResponse("Course folder not found");
+      courseFolder.setTrashed(true);
+
+      const courseFolders = teacherFolder.getFolders();
+      let hasCourses = false;
+      while (courseFolders.hasNext()) {
+        const f = courseFolders.next();
+        if (!f.isTrashed()) { hasCourses = true; break; }
+      }
+      if (!hasCourses) {
+        teacherFolder.setTrashed(true);
+        return successResponse("Course and teacher folder deleted");
+      }
+      return successResponse("Course folder deleted");
+    }
 
     return ContentService.createTextOutput(
-      JSON.stringify({ success: true, message: "File deleted" })
+      JSON.stringify({ success: false, error: "Unknown action" })
     ).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService.createTextOutput(
       JSON.stringify({ success: false, error: error.toString() })
     ).setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+function getFolderByName(parent, name) {
+  const folders = parent.getFoldersByName(name);
+  return folders.hasNext() ? folders.next() : null;
+}
+
+function successResponse(message) {
+  return ContentService.createTextOutput(
+    JSON.stringify({ success: true, message: message })
+  ).setMimeType(ContentService.MimeType.JSON);
 }
