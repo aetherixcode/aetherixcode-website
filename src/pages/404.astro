@@ -1,0 +1,26 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <div class="min-h-dvh flex items-center justify-center p-4">
+    <div class="text-center">
+      <div class="relative mb-8">
+        <h1 class="font-heading text-8xl sm:text-9xl md:text-[12rem] font-bold leading-none bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700 bg-clip-text text-transparent" style={{ filter: "drop-shadow(0 0 60px rgba(245,158,11,0.2))" }}>
+          404
+        </h1>
+        <div class="absolute -inset-4 bg-amber-500/5 blur-3xl rounded-full -z-10" />
+      </div>
+      <h2 class="font-heading text-xl sm:text-2xl font-semibold text-amber-heading mb-3 tracking-wide">PAGE NOT FOUND</h2>
+      <p class="text-sm text-text-label font-body mb-8 max-w-sm mx-auto">
+        The page you&apos;re looking for doesn&apos;t exist or has been moved.
+      </p>
+      <a href="/" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-body font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-600 rounded-xl hover:from-amber-300 hover:to-amber-500 transition-all duration-300 shadow-lg shadow-amber-600/20 hover:shadow-amber-500/30 hover:scale-105">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-4 h-4">
+          <path d="M19 12H5M12 19l-7-7 7-7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Back to Home
+      </a>
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,36 @@
+---
+import "../styles/global.css";
+import FireParticles from "../components/FireParticles";
+import { AuthProvider } from "../components/AuthContext";
+import { ToastContainer } from "../components/ToastContext";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Aetherix — A next-generation learning platform. Master skills with expert-led courses." />
+    <meta name="theme-color" content="#070707" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Tektur:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>Aetherix — Learn Without Limits</title>
+  </head>
+  <body>
+    <FireParticles client:load />
+    <ToastContainer client:load />
+
+    <div class="relative z-10">
+      <AuthProvider>
+        <slot />
+      </AuthProvider>
+    </div>
+  </body>
+</html>

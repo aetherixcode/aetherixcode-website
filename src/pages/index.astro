@@ -1,0 +1,20 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AuthRedirect from "../components/AuthRedirect";
+import Navbar from "../components/Navbar";
+import Hero from "../components/Hero";
+import About from "../components/About";
+import Features from "../components/Features";
+import Footer from "../components/Footer";
+import Cursor3D from "../components/Cursor3D";
+---
+
+<Layout>
+  <Cursor3D client:load />
+  <AuthRedirect client:load />
+  <Navbar client:load />
+  <Hero client:load />
+  <About client:load />
+  <Features client:load />
+  <Footer />
+</Layout>
