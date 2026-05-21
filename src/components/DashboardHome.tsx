@@ -256,6 +256,7 @@ export default function DashboardHome() {
     }
   };
 
+  const [activeResource, setActiveResource] = useState<"notes" | "dpp" | "dpp_solution" | null>(null);
   const quizScore = quizData ? quizData.questions.filter((q, i) => quizAnswers[i] === q.answer).length : 0;
 
   if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><div className="w-6 h-6 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin" /></div>;
@@ -372,11 +373,82 @@ export default function DashboardHome() {
                   )}
                 </button>
               </div>
-              <div className="flex flex-wrap gap-3 mt-4">
-                {activeLecture.notes_url && <a href={activeLecture.notes_url} target="_blank" rel="noopener" className="px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all duration-200">Download Notes</a>}
-                {activeLecture.dpp_url && <a href={activeLecture.dpp_url} target="_blank" rel="noopener" className="px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all duration-200">Download DPP</a>}
-                {activeLecture.dpp_solution_url && <a href={activeLecture.dpp_solution_url} target="_blank" rel="noopener" className="px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all duration-200">Download DPP Solutions</a>}
-                {activeLecture.quiz_url && <button onClick={() => loadQuiz(activeLecture.quiz_url!)} className="px-4 py-2 text-xs font-body text-black bg-gradient-to-r from-amber-400 to-amber-600 rounded-lg hover:from-amber-300 hover:to-amber-500 transition-all duration-200">Take Quiz</button>}
+              <div className="mt-6 space-y-3">
+                {activeLecture.notes_url && (
+                  <div className="rounded-xl border border-border-subtle bg-surface-card overflow-hidden">
+                    <button onClick={() => setActiveResource(activeResource === "notes" ? null : "notes")} className="w-full flex items-center justify-between px-5 py-4 hover:bg-surface-card-hover transition-all">
+                      <div className="flex items-center gap-3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-amber-accent/70"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><polyline points="14 2 14 8 20 8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><line x1="16" y1="13" x2="8" y2="13" strokeWidth="1.5" strokeLinecap="round" /><line x1="16" y1="17" x2="8" y2="17" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                        <span className="text-sm font-body text-text-secondary">Notes</span>
+                      </div>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={`w-4 h-4 text-text-placeholder transition-transform duration-200 ${activeResource === "notes" ? "rotate-180" : ""}`}><path d="M6 9l6 6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </button>
+                    {activeResource === "notes" && (
+                      <div className="border-t border-border-subtle">
+                        <iframe src={activeLecture.notes_url} className="w-full h-[500px]" title="Notes" />
+                        <div className="flex justify-end p-3 border-t border-border-subtle">
+                          <a href={activeLecture.notes_url} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><polyline points="7 10 12 15 17 10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeWidth="2" strokeLinecap="round" /></svg>
+                            Download
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {activeLecture.dpp_url && (
+                  <div className="rounded-xl border border-border-subtle bg-surface-card overflow-hidden">
+                    <button onClick={() => setActiveResource(activeResource === "dpp" ? null : "dpp")} className="w-full flex items-center justify-between px-5 py-4 hover:bg-surface-card-hover transition-all">
+                      <div className="flex items-center gap-3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-amber-accent/70"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><polyline points="14 2 14 8 20 8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><line x1="16" y1="13" x2="8" y2="13" strokeWidth="1.5" strokeLinecap="round" /><line x1="16" y1="17" x2="8" y2="17" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                        <span className="text-sm font-body text-text-secondary">DPP Problem</span>
+                      </div>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={`w-4 h-4 text-text-placeholder transition-transform duration-200 ${activeResource === "dpp" ? "rotate-180" : ""}`}><path d="M6 9l6 6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </button>
+                    {activeResource === "dpp" && (
+                      <div className="border-t border-border-subtle">
+                        <iframe src={activeLecture.dpp_url} className="w-full h-[500px]" title="DPP Problem" />
+                        <div className="flex justify-end p-3 border-t border-border-subtle">
+                          <a href={activeLecture.dpp_url} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><polyline points="7 10 12 15 17 10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeWidth="2" strokeLinecap="round" /></svg>
+                            Download
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {activeLecture.dpp_solution_url && (
+                  <div className="rounded-xl border border-border-subtle bg-surface-card overflow-hidden">
+                    <button onClick={() => setActiveResource(activeResource === "dpp_solution" ? null : "dpp_solution")} className="w-full flex items-center justify-between px-5 py-4 hover:bg-surface-card-hover transition-all">
+                      <div className="flex items-center gap-3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-amber-accent/70"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><polyline points="14 2 14 8 20 8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><line x1="16" y1="13" x2="8" y2="13" strokeWidth="1.5" strokeLinecap="round" /><line x1="16" y1="17" x2="8" y2="17" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                        <span className="text-sm font-body text-text-secondary">DPP Solution</span>
+                      </div>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={`w-4 h-4 text-text-placeholder transition-transform duration-200 ${activeResource === "dpp_solution" ? "rotate-180" : ""}`}><path d="M6 9l6 6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </button>
+                    {activeResource === "dpp_solution" && (
+                      <div className="border-t border-border-subtle">
+                        <iframe src={activeLecture.dpp_solution_url} className="w-full h-[500px]" title="DPP Solution" />
+                        <div className="flex justify-end p-3 border-t border-border-subtle">
+                          <a href={activeLecture.dpp_solution_url} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><polyline points="7 10 12 15 17 10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="15" x2="12" y2="3" strokeWidth="2" strokeLinecap="round" /></svg>
+                            Download
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {activeLecture.quiz_url && (
+                  <button onClick={() => loadQuiz(activeLecture.quiz_url!)} className="w-full flex items-center justify-between px-5 py-4 rounded-xl border border-border-subtle bg-surface-card hover:bg-surface-card-hover transition-all">
+                    <div className="flex items-center gap-3">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-amber-accent/70"><circle cx="12" cy="12" r="10" strokeWidth="1.5" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <span className="text-sm font-body text-text-secondary">Take Quiz</span>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 text-amber-accent/50"><path d="M5 12h14M12 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                )}
               </div>
             </>
           ) : (
