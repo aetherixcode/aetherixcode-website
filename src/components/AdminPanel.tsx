@@ -153,8 +153,8 @@ export default function AdminPanel() {
 
     setUploading(field);
     try {
-      const { downloadUrl } = await uploadToDrive(file, course.teacher_name, course.name, `Lecture ${lecForm.lecture_number || "new"}`);
-      setLecForm(p => ({ ...p, [field]: downloadUrl }));
+      const { embedUrl } = await uploadToDrive(file, course.teacher_name, course.name, `Lecture ${lecForm.lecture_number || "new"}`);
+      setLecForm(p => ({ ...p, [field]: embedUrl }));
       toastSuccess(`${file.name} uploaded to Drive!`);
     } catch (err) {
       toastError(err instanceof Error ? err.message : "Upload failed");

@@ -62,6 +62,7 @@ function doPost(e) {
 
     const downloadUrl = `https://drive.google.com/uc?export=download&id=${file.getId()}`;
     const previewUrl = `https://drive.google.com/file/d/${file.getId()}/view`;
+    const embedUrl = `https://drive.google.com/file/d/${file.getId()}/preview`;
 
     return ContentService.createTextOutput(
       JSON.stringify({
@@ -69,6 +70,7 @@ function doPost(e) {
         fileId: file.getId(),
         downloadUrl: downloadUrl,
         previewUrl: previewUrl,
+        embedUrl: embedUrl,
       })
     ).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
