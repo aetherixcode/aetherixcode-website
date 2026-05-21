@@ -257,6 +257,7 @@ export default function DashboardHome() {
     }
   };
 
+  const [activeResource, setActiveResource] = useState<"notes" | "dpp" | "dpp_solution" | null>(null);
   const quizScore = quizData ? quizData.questions.filter((q, i) => quizAnswers[i] === q.answer).length : 0;
 
   if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><div className="w-6 h-6 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin" /></div>;
