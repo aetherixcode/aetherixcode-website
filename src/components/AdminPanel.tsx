@@ -304,7 +304,7 @@ export default function AdminPanel() {
                   <button onClick={() => setPreviewMd(!previewMd)} className="text-[10px] font-body text-amber-accent/70 hover:text-amber-heading transition-colors uppercase tracking-wider">{previewMd ? "Write" : "Preview"}</button>
                 </div>
                 {previewMd ? (
-                  <div className="w-full min-h-[160px] max-h-[300px] overflow-y-auto bg-surface-code border border-border-default rounded-lg px-4 py-3 text-sm text-text-body prose prose-invert prose-sm">
+                  <div className="w-full min-h-[160px] max-h-[300px] overflow-y-auto bg-surface-code border border-border-default rounded-lg px-4 py-3 text-sm prose prose-sm">
                     {(editing || form).description ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{(editing || form).description}</ReactMarkdown> : <span className="text-text-placeholder italic">Nothing to preview</span>}
                   </div>
                 ) : (

@@ -489,8 +489,8 @@ export default function DashboardHome() {
                     <button key={oi} disabled={quizSubmitted} onClick={() => setQuizAnswers(prev => ({ ...prev, [qi]: oi }))}
                       className={`w-full text-left px-5 py-3.5 text-sm font-body rounded-lg border transition-all duration-200 ${
                         quizSubmitted
-                          ? oi === q.answer ? "border-green-500/50 bg-green-500/10 text-green-400" : quizAnswers[qi] === oi ? "border-red-500/50 bg-red-500/10 text-red-400" : "border-zinc-800 text-text-placeholder"
-                          : quizAnswers[qi] === oi ? "border-amber-500/50 bg-amber-500/10 text-amber-heading" : "border-zinc-800 text-text-muted hover:border-amber-500/30"
+                          ? oi === q.answer ? "border-green-500/50 bg-green-500/10 text-green-400" : quizAnswers[qi] === oi ? "border-red-500/50 bg-red-500/10 text-red-400" : "border-border-strong-zinc text-text-placeholder"
+                          : quizAnswers[qi] === oi ? "border-amber-500/50 bg-amber-500/10 text-amber-heading" : "border-border-strong-zinc text-text-muted hover:border-amber-500/30"
                       }`}>
                       {opt}
                     </button>

@@ -116,7 +116,7 @@ export default function CourseDetail({ slug, onBack }: { slug: string; onBack: (
 
       <div className="mt-10">
         <h2 className="font-heading text-lg text-amber-heading mb-4">About This Course</h2>
-        <div className="prose prose-invert prose-sm max-w-none text-text-muted font-body leading-relaxed">
+        <div className="prose prose-sm max-w-none text-text-body font-body leading-relaxed">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{course.description}</ReactMarkdown>
         </div>
       </div>
