@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Logo from "./Logo";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -27,17 +28,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2.5 group">
-          <svg viewBox="0 0 40 40" className="w-7 h-7 md:w-8 md:h-8" fill="none">
-            <defs>
-              <linearGradient id="lg" x1="0" y1="0" x2="40" y2="40">
-                <stop offset="0%" stopColor="#fbbf24" />
-                <stop offset="100%" stopColor="#d97706" />
-              </linearGradient>
-            </defs>
-            <path d="M20 3 L35 11.5 V28.5 L20 37 L5 28.5 V11.5 Z" stroke="url(#lg)" strokeWidth="1.5" opacity="0.5" />
-            <path d="M20 11 L27 30 L13 30 Z" stroke="url(#lg)" strokeWidth="2" />
-            <circle cx="20" cy="22" r="3" fill="#f59e0b" />
-          </svg>
+          <Logo className="w-7 h-7 md:w-8 md:h-8" />
           <span className="font-heading text-base md:text-lg tracking-[0.2em] text-amber-heading font-semibold">
             AETHERIX
           </span>

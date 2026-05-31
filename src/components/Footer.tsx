@@ -1,3 +1,5 @@
+import Logo from "./Logo";
+
 export default function Footer() {
   return (
     <footer className="relative border-t border-border-footer/50">
@@ -6,11 +8,7 @@ export default function Footer() {
           {/* Brand — spans 5 cols */}
           <div className="lg:col-span-5">
             <a href="/" className="flex items-center gap-2.5 mb-5">
-              <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-                <path d="M20 3 L35 11.5 V28.5 L20 37 L5 28.5 V11.5 Z" stroke="#f59e0b" strokeWidth="1.5" opacity="0.5" />
-                <path d="M20 11 L27 30 L13 30 Z" stroke="#f59e0b" strokeWidth="2" />
-                <circle cx="20" cy="22" r="3" fill="#f59e0b" />
-              </svg>
+              <Logo className="w-7 h-7" />
               <span className="font-heading text-base tracking-[0.2em] text-amber-heading font-semibold">AETHERIX</span>
             </a>
             <p className="text-sm text-text-label font-body leading-relaxed max-w-sm mb-6">

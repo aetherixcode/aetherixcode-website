@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { supabase } from "../lib/supabase";
 
+import Logo from "./Logo";
 import { toastError, toastSuccess } from "./ToastContext";
 
 export default function RegisterForm() {
@@ -56,12 +57,7 @@ export default function RegisterForm() {
     <>
       <div className="lg:hidden text-center mb-5 animate-fade-in-up">
         <a href="/" className="inline-flex items-center gap-2 mb-3 group">
-          <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-            <path d="M20 3 L35 11.5 V28.5 L20 37 L5 28.5 V11.5 Z" stroke="#f59e0b" strokeWidth="1.5" opacity="0.5" />
-            <path d="M20 11 L27 30 L13 30 Z" stroke="url(#lg)" strokeWidth="2" />
-            <circle cx="20" cy="22" r="3" fill="#f59e0b" />
-            <defs><linearGradient id="lg" x1="0" y1="0" x2="40" y2="40"><stop offset="0%" stopColor="#fbbf24" /><stop offset="100%" stopColor="#d97706" /></linearGradient></defs>
-          </svg>
+          <Logo className="w-7 h-7" />
           <span className="font-heading text-base tracking-[0.15em] text-amber-heading">AETHERIX</span>
         </a>
         <h1 className="font-heading text-2xl font-bold text-amber-heading mb-1">CREATE ACCOUNT</h1>
