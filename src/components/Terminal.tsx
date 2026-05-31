@@ -90,18 +90,18 @@ export default function Terminal() {
   }, [phase, cmdIndex]);
 
   return (
-    <div className="w-[420px] h-[320px] bg-[#0a0a0a]/90 border border-amber-500/20 rounded-xl overflow-hidden shadow-2xl shadow-amber-900/10 backdrop-blur-sm">
+    <div className="w-[420px] h-[320px] bg-surface-card border border-border-default rounded-xl overflow-hidden shadow-2xl shadow-amber-glow-shadow">
       {/* Terminal header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-[#111111] border-b border-amber-500/10">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-surface-raised border-b border-border-divider">
         <div className="flex gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
           <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
         </div>
-        <span className="text-[10px] font-mono text-amber-500/50 ml-2 tracking-wider">brain terminal</span>
+        <span className="text-[10px] font-mono text-amber-subtle ml-2 tracking-wider">brain terminal</span>
         <div className="ml-auto flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-amber-500/40 animate-pulse" />
-          <span className="text-[9px] font-mono text-amber-500/30">v2.1.0</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-amber-accent/40 animate-pulse" />
+          <span className="text-[9px] font-mono text-amber-subtle/60">v2.1.0</span>
         </div>
       </div>
 
@@ -110,30 +110,30 @@ export default function Terminal() {
         {lines.map((line, i) => (
           <div key={i} className="mb-1">
             {line.type === "command" && (
-              <span className="text-amber-400/80">{line.text}</span>
+              <span className="text-amber-accent">{line.text}</span>
             )}
             {line.type === "progress" && (
               <div className="flex items-center gap-2">
-                <span className="text-amber-500/40">▸</span>
+                <span className="text-amber-subtle">▸</span>
                 <div className="flex-1 h-1.5 bg-amber-500/10 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full transition-all duration-150"
                     style={{ width: `${line.progress}%` }}
                   />
                 </div>
-                <span className="text-amber-500/50 w-8 text-right">{Math.round(line.progress!)}%</span>
+                <span className="text-amber-subtle w-8 text-right">{Math.round(line.progress!)}%</span>
               </div>
             )}
             {line.type === "success" && (
-              <span className="text-green-400/70">{line.text}</span>
+              <span className="text-green-500">{line.text}</span>
             )}
             {line.type === "info" && (
-              <span className="text-amber-500/40">{line.text}</span>
+              <span className="text-amber-subtle">{line.text}</span>
             )}
           </div>
         ))}
         {phase === "typing" && (
-          <span className="text-amber-400/80">
+          <span className="text-amber-accent">
             $ {typedText}
             <span className="animate-pulse">█</span>
           </span>

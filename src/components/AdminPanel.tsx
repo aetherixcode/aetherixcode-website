@@ -274,7 +274,7 @@ export default function AdminPanel() {
               <div className="flex gap-2 shrink-0">
                 <button onClick={() => { setShowLectureList(c.id); loadLectures(c.id); }} className="px-3 py-1.5 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">Lectures</button>
                 <button onClick={() => setShowLecture(c.id)} className="px-3 py-1.5 text-xs font-body text-amber-heading border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-all">+ Lecture</button>
-                <button onClick={() => { setEditing({ ...c }); }} className="px-3 py-1.5 text-xs font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Edit</button>
+                <button onClick={() => { setEditing({ ...c }); }} className="px-3 py-1.5 text-xs font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-surface-card-hover transition-all">Edit</button>
                 <button onClick={() => setConfirmDelete(c.id)} className="px-3 py-1.5 text-xs font-body text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-all">Delete</button>
               </div>
             </div>
@@ -314,7 +314,7 @@ export default function AdminPanel() {
               </div>
             </div>
             <div className="flex gap-4 mt-6">
-              <button onClick={() => { setShowCreate(false); setEditing(null); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
+              <button onClick={() => { setShowCreate(false); setEditing(null); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-surface-card-hover transition-all">Cancel</button>
               <button onClick={editing ? handleEdit : handleCreate} disabled={createLoading} className="flex-1 py-3 text-sm font-body font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-600 rounded-lg hover:from-amber-300 hover:to-amber-500 transition-all disabled:opacity-50">{createLoading ? "Creating..." : editing ? "Save" : "Create"}</button>
             </div>
           </div>
@@ -337,7 +337,7 @@ export default function AdminPanel() {
               {renderResourceField("quiz_url", "Quiz JSON", ".json,.pdf", quizRef)}
             </div>
             <div className="flex gap-4 mt-6">
-              <button onClick={() => { setShowLecture(null); setLecForm({ lecture_number: "", title: "", video_url: "", notes_url: "", dpp_url: "", dpp_solution_url: "", quiz_url: "" }); setUploadStatus({ notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null }); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
+              <button onClick={() => { setShowLecture(null); setLecForm({ lecture_number: "", title: "", video_url: "", notes_url: "", dpp_url: "", dpp_solution_url: "", quiz_url: "" }); setUploadStatus({ notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null }); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-surface-card-hover transition-all">Cancel</button>
               <button onClick={handleAddLecture} className="flex-1 py-3 text-sm font-body font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-600 rounded-lg hover:from-amber-300 hover:to-amber-500 transition-all">Add</button>
             </div>
           </div>
@@ -389,7 +389,7 @@ export default function AdminPanel() {
               {renderResourceField("quiz_url", "Quiz JSON", ".json,.pdf", quizRef)}
             </div>
             <div className="flex gap-4 mt-6">
-              <button onClick={() => { setEditingLecture(null); setUploadStatus({ notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null }); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
+              <button onClick={() => { setEditingLecture(null); setUploadStatus({ notes_url: null, dpp_url: null, dpp_solution_url: null, quiz_url: null }); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-surface-card-hover transition-all">Cancel</button>
               <button onClick={handleEditLecture} disabled={lecEditLoading} className="flex-1 py-3 text-sm font-body font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-600 rounded-lg hover:from-amber-300 hover:to-amber-500 transition-all disabled:opacity-50">{lecEditLoading ? "Saving..." : "Save"}</button>
             </div>
           </div>
@@ -403,7 +403,7 @@ export default function AdminPanel() {
             <p className="text-sm text-text-label font-body mb-6">Type <span className="text-red-400 font-mono">yes</span> to permanently delete this course and all its lectures.</p>
             <input type="text" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="Type yes" className="w-full bg-surface-input border border-border-destructive rounded-lg px-4 py-3 text-sm text-text-secondary font-body outline-none focus:border-border-destructive-focus mb-6" />
             <div className="flex gap-4">
-              <button onClick={() => { setConfirmDelete(null); setConfirmText(""); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
+              <button onClick={() => { setConfirmDelete(null); setConfirmText(""); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-surface-card-hover transition-all">Cancel</button>
               <button onClick={() => handleDelete(confirmDelete)} disabled={confirmText.toLowerCase() !== "yes"} className="flex-1 py-3 text-sm font-body text-black bg-red-500 rounded-lg disabled:opacity-30 hover:bg-red-400 transition-all">Delete</button>
             </div>
           </div>

@@ -128,7 +128,7 @@ export default function CourseDetail({ slug, onBack }: { slug: string; onBack: (
             <p className="text-sm text-text-label font-body mb-6">Type <span className="text-red-400 font-mono">yes</span> to unenroll from <span className="text-text-secondary">{course.name}</span>.</p>
             <input type="text" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="Type yes" className="w-full bg-surface-input border border-border-destructive rounded-lg px-4 py-3 text-sm text-text-secondary font-body outline-none focus:border-border-destructive-focus mb-6" />
             <div className="flex gap-4">
-              <button onClick={() => { setShowUnenroll(false); setConfirmText(""); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
+              <button onClick={() => { setShowUnenroll(false); setConfirmText(""); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-surface-card-hover transition-all">Cancel</button>
               <button onClick={handleUnenroll} disabled={confirmText.toLowerCase() !== "yes" || actionLoading} className="flex-1 py-3 text-sm font-body text-black bg-red-500 rounded-lg disabled:opacity-30 hover:bg-red-400 transition-all">{actionLoading ? "Unenrolling..." : "Unenroll"}</button>
             </div>
           </div>

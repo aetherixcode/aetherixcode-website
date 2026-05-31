@@ -294,7 +294,7 @@ export default function DashboardHome() {
         <div className="flex-1 w-full sm:w-auto">
           <label className="text-[10px] font-body tracking-wider text-text-label uppercase mb-1 block">Progress</label>
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-surface-subtle rounded-full overflow-hidden">
               <div className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
             </div>
             <span className="text-xs font-body text-amber-heading min-w-[40px] text-right">{progress}%</span>
@@ -328,7 +328,7 @@ export default function DashboardHome() {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-3.5 h-3.5"><path d="M3 12a9 9 0 1 1 3 6.75" strokeWidth="2" strokeLinecap="round" /><path d="M3 21v-6h6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
                   <button onClick={() => toggleComplete(lec.id)}
-                    className={`shrink-0 w-7 h-7 rounded-md flex items-center justify-center transition-all duration-200 ${isDone ? "bg-amber-500/20 text-amber-heading" : "bg-zinc-800/50 text-text-placeholder hover:text-amber-heading hover:bg-zinc-800"}`}>
+                    className={`shrink-0 w-7 h-7 rounded-md flex items-center justify-center transition-all duration-200 ${isDone ? "bg-amber-500/20 text-amber-heading" : "bg-surface-lecture text-text-placeholder hover:text-amber-heading hover:bg-surface-card-hover"}`}>
                     {isDone ? (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><path d="M20 6L9 17l-5-5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     ) : (
@@ -360,7 +360,7 @@ export default function DashboardHome() {
                   <p className="text-xs text-text-label font-body">Lecture {activeLecture.lecture_number}</p>
                 </div>
                 <button onClick={() => toggleComplete(activeLecture.id)}
-                  className={`shrink-0 flex items-center gap-2 px-4 py-2 text-xs font-body font-semibold rounded-lg transition-all duration-200 ${completedIds.has(activeLecture.id) ? "bg-amber-500/20 text-amber-heading border border-amber-500/30 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30" : "bg-zinc-800 text-text-muted border border-border-strong-zinc hover:bg-amber-500/10 hover:text-amber-heading hover:border-amber-500/30"}`}>
+                  className={`shrink-0 flex items-center gap-2 px-4 py-2 text-xs font-body font-semibold rounded-lg transition-all duration-200 ${completedIds.has(activeLecture.id) ? "bg-amber-500/20 text-amber-heading border border-amber-500/30 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30" : "bg-surface-card text-text-muted border border-border-strong-zinc hover:bg-amber-500/10 hover:text-amber-heading hover:border-amber-500/30"}`}>
                   {completedIds.has(activeLecture.id) ? (
                     <>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><path d="M20 6L9 17l-5-5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -467,7 +467,7 @@ export default function DashboardHome() {
             <p className="text-sm text-text-label font-body mb-6">Type <span className="text-red-400 font-mono">yes</span> to unenroll from <span className="text-text-secondary">{selected?.course.name}</span>. This will remove all progress.</p>
             <input type="text" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="Type yes" className="w-full bg-surface-input border border-border-destructive rounded-lg px-4 py-3 text-sm text-text-secondary font-body outline-none focus:border-border-destructive-focus mb-6" />
             <div className="flex gap-4">
-              <button onClick={() => { setShowUnenroll(false); setConfirmText(""); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Cancel</button>
+              <button onClick={() => { setShowUnenroll(false); setConfirmText(""); }} className="flex-1 py-3 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-surface-card-hover transition-all">Cancel</button>
               <button onClick={handleUnenroll} disabled={confirmText.toLowerCase() !== "yes" || unenrollLoading} className="flex-1 py-3 text-sm font-body text-black bg-red-500 rounded-lg disabled:opacity-30 hover:bg-red-400 transition-all">{unenrollLoading ? "Unenrolling..." : "Unenroll"}</button>
             </div>
           </div>

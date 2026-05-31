@@ -109,7 +109,7 @@ export default function Settings() {
                 <button onClick={handleChangePassword} disabled={passwordLoading} className="px-5 py-2.5 text-sm font-body font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-600 rounded-xl hover:from-amber-300 hover:to-amber-500 transition-all disabled:opacity-50">
                   {passwordLoading ? "Updating..." : "Update Password"}
                 </button>
-                <button onClick={() => { setShowChangePassword(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); }} className="px-4 py-2.5 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">
+                <button onClick={() => { setShowChangePassword(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); }} className="px-4 py-2.5 text-sm font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-surface-card-hover transition-all">
                   Cancel
                 </button>
               </div>

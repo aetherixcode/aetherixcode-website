@@ -231,7 +231,7 @@ export default function VideoPlayer({ videoUrl, lectureId, userId, savedTime, on
             <p className="text-sm text-text-muted font-body mb-1">Continue watching?</p>
             <p className="font-heading text-xl text-amber-heading mb-5">Resume from {formatTime(resumeTime)}?</p>
             <div className="flex gap-3">
-              <button onClick={handleStartOver} className="flex-1 py-2.5 text-xs font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-zinc-800 transition-all">Start Over</button>
+              <button onClick={handleStartOver} className="flex-1 py-2.5 text-xs font-body text-text-muted border border-border-strong-zinc rounded-lg hover:bg-surface-card-hover transition-all">Start Over</button>
               <button onClick={handleResume} className="flex-1 py-2.5 text-xs font-body font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-600 rounded-lg hover:from-amber-300 hover:to-amber-500 transition-all">Resume</button>
             </div>
           </div>
